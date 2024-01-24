@@ -1,51 +1,62 @@
-import React, { useEffect, useState } from 'react';
-import {useDispatch} from 'react-redux';
-import {add} from '../store/cartSlice';
-
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { add } from '../store/cartSlice';
+import {STATUSES} from "../store/productSlice"
+import {fetchProducts} from "../store/productSlice";    
 
 const Products = () => {
-    const dispatch = useDispatch();
-    const [products , setProducts] = useState([]);
+  const dispatch = useDispatch();
+  const {data: products, status} = useSelector((state) => state.product);
+//   const [products, setProducts] = useState([]);
 
-    useEffect(() => {
+  useEffect(() => {
 
-        const fetchProducts = async () =>{
-            const res = await fetch('https://fakestoreapi.com/products');
+    dispatch(fetchProducts());
 
-            const data = await res.json();
+    // const fetchProducts = async () => {
+    //   const res = await fetch("https://fakestoreapi.com/products");
 
-            console.log(data);
+    //   const data = await res.json();
 
-            setProducts(data);
-        }   
-        fetchProducts();
+    //   console.log(data);
 
-     }, []);
+    //   setProducts(data);
+    // };
+    // fetchProducts();
+  }, []);
 
+  const handleAdd = (product) => {
+    dispatch(add(product));
+  };
 
-     const handleAdd = (product) =>{
-        dispatch(add(product))
-             
-     }
+  if(status === STATUSES.LOADING){
+    return <h2>Loading......</h2>
+}
 
-     return (
-      <div className='ProductWrapper'>
+if(status ===  STATUSES.ERROR){
+    return <h2>Something Went Wrong!</h2>
+}
 
-        {
-            products.map((product) => (
-                <div className='card' key={products.id}>
-                    <img src={products.image} alt="" />
-                    <h4>{products.title}</h4>
-                    <h3>{products.price}</h3>
-                    <button className='btn' onClick={()=>{handleAdd(product)}}> add to cart </button>
-                     </div>
-            ))
-        } 
-
-
-     </div>
-    
-    )};
+  return (
+    <div className="ProductWrapper">
+      {products.map((product) => (
+        <div  key={product.id} className="card">
+          <img src={product.image} alt="" />
+          <h4>{product.title}</h4>
+          <h3>{product.price}</h3>
+          <button
+            className="btn"
+            onClick={() => {
+              handleAdd(product);
+            }}
+          >
+            {" "}
+            add to cart{" "}
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default Products;
-
